@@ -8,59 +8,63 @@ def main():
 
 
 def process_lines(lines: list[str]):
+    print(n_active(lines, 0, 0, 0, 1))
+
+
+def n_active(lines, r, c, dr, dc):
     n_rows = len(lines)
     n_cols = len(lines[0])
-    incoming = {(0, 0, (0, 1))}
-    prior_incomings = set()
-    while True:
-        next_incoming = set()
-        for row, col, (dr, dc) in incoming:
+
+    active_wavefronts = {(r, c, dr, dc)}
+    previous_wavefronts = set()
+
+    while len(active_wavefronts) > 0:
+        next_wavefronts = set()
+        for row, col, dr, dc in active_wavefronts:
             square = lines[row][col]
-            outgoings = set()
+            next_wavefront_dirs = set()
             match square:
                 case ".":
                     # direction is preserved
-                    outgoings.add((dr, dc))
+                    next_wavefront_dirs.add((dr, dc))
                 case "/":
-                    outgoings.add((-dc, -dr))
+                    next_wavefront_dirs.add((-dc, -dr))
                 case "\\":
-                    outgoings.add((dc, dr))
+                    next_wavefront_dirs.add((dc, dr))
                 case "|":
                     if dc == 0:
                         # straight through
-                        outgoings.add((dr, dc))
+                        next_wavefront_dirs.add((dr, dc))
                     else:
                         # pointy ends
-                        outgoings.add((-1, 0))
-                        outgoings.add((1, 0))
+                        next_wavefront_dirs.add((-1, 0))
+                        next_wavefront_dirs.add((1, 0))
                 case "-":
                     if dr == 0:
                         # straight through
-                        outgoings.add((dr, dc))
+                        next_wavefront_dirs.add((dr, dc))
                     else:
                         # pointy ends
-                        outgoings.add((0, -1))
-                        outgoings.add((0, 1))
+                        next_wavefront_dirs.add((0, -1))
+                        next_wavefront_dirs.add((0, 1))
                 case _:
                     assert False, square
-            for dr, dc in outgoings:
-                next = (row + dr, col + dc, (dr, dc))
-                if next[0] < 0 or next[1] < 0:
+            for dr, dc in next_wavefront_dirs:
+                next_wavefront = (row + dr, col + dc, dr, dc)
+                if next_wavefront[0] < 0 or next_wavefront[1] < 0:
                     continue
-                if next[0] >= n_rows or next[1] >= n_cols:
+                if next_wavefront[0] >= n_rows or next_wavefront[1] >= n_cols:
                     continue
-                next_incoming.add(next)
-        # remove existing incomings
-        prior_incomings |= incoming
-        new_incomings = next_incoming - prior_incomings
-        if len(new_incomings) == 0:
-            break
-        incoming = new_incomings
+                next_wavefronts.add(next_wavefront)
+
+        # Only wavefronts we've not previously considered need to be processed
+        previous_wavefronts |= active_wavefronts
+        active_wavefronts = next_wavefronts - previous_wavefronts
 
     active = np.zeros((n_rows, n_cols), dtype=np.uint8)
-    for r, c, _ in prior_incomings:
+    for r, c, _, _ in previous_wavefronts:
         active[r][c] = 1
-    print(np.sum(active.flat))
+    return np.sum(active.flat)
 
 
 if __name__ == "__main__":

@@ -69,7 +69,7 @@ def process_lines(lines: list[str]):
         dr, dc = n1[0] - n2[0], n1[1] - n2[1]
         return np.sqrt(dr * dr + dc * dc)
 
-    print(nx.astar_path_length(G, (0, 0), (n_rows - 1, n_cols - 1), dist_heuristic, "weight"))
+    print(nx.shortest_path_length(G, (0, 0), (n_rows - 1, n_cols - 1), "weight"))
 
 
 if __name__ == "__main__":

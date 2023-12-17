@@ -58,14 +58,18 @@ def process_lines(lines: list[str]):
                 for d in "TB":
                     G.add_edge((r, c + dc + 1, d), (r, c, "R"), weight=weight)
 
-    G.add_node("start")
-    G.add_node("end")
+    G.add_node((0, 0))
+    G.add_node((n_rows - 1, n_cols - 1))
 
     for d in "LRTB":
-        G.add_edge("start", (0, 0, d), weight=0)
-        G.add_edge((n_rows - 1, n_cols - 1, d), "end", weight=0)
+        G.add_edge((0, 0), (0, 0, d), weight=0)
+        G.add_edge((n_rows - 1, n_cols - 1, d), (n_rows - 1, n_cols - 1), weight=0)
 
-    print(nx.shortest_path_length(G, "start", "end", "weight"))
+    def dist_heuristic(n1, n2):
+        dr, dc = n1[0] - n2[0], n1[1] - n2[1]
+        return np.sqrt(dr * dr + dc * dc)
+
+    print(nx.astar_path_length(G, (0, 0), (n_rows - 1, n_cols - 1), dist_heuristic, "weight"))
 
 
 if __name__ == "__main__":

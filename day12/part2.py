@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import functools
 
+from tqdm import tqdm
+
 
 def main():
     with open("input1.txt") as f:
@@ -85,7 +87,7 @@ def n_matches(pattern: str, block_lens: tuple[int]) -> int:
 
 def process_lines(lines: list[str]):
     match_sum = 0
-    for idx, ln in enumerate(lines):
+    for ln in tqdm(lines):
         pattern, spec = ln.split(" ")
         pattern = "?".join([pattern] * 5)
         spec = ",".join([spec] * 5)
@@ -94,10 +96,7 @@ def process_lines(lines: list[str]):
         if len(block_lens) == 0:
             continue
 
-        print(f"line: {idx}, pattern: {pattern!r}, spec: {block_lens!r}")
-        # print(pattern)
         match_count = n_matches(pattern, block_lens)
-        print(f"count: {match_count}")
         match_sum += match_count
 
     print(match_sum)
